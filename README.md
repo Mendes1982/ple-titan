@@ -1,29 +1,38 @@
-# Submission template: Pi on Claude Opus 5.5
+# PLE-Titan: Elite Physical-Engineering Agent Harness
 
-A working entry for the Physical-Engineering’s Last Exam harness competition: the [Pi](https://github.com/badlogic/pi-mono) coding agent calling `google-cloud/claude-opus-5-5`.
+High-performance agent harness for the **Physical-Engineering’s Last Exam (PLE)** competition ($400,000 USD prize pool).
 
-## Use it
+Combines the multi-phase decomposition of `plan-verify` with architectural patterns from DeepSeek Harness (`repeat-tool-reminder`, `compaction-tool-result-pruner`, `deliverables-guard`) and strict Python-first deterministic calculation directives.
 
-1. Click **Use this template**. Public works. Make it private if you add a `.env` with API keys or want to keep your code to yourself, and install the [PLE-submission](https://github.com/apps/ple-submission) app on it.
-2. Clone it next to the competition repository and set `name` in `submission.yaml`.
-3. From the competition repository, check the entry and run the dev set (a `google-cloud` model needs a local proxy, see `docs/models.md`):
-   ```bash
-   uv run python -m kit check ../your-repo
-   uv run python eval/run.py ../your-repo     # writes artifacts/
-   ```
-4. Commit everything, `artifacts/` included, push, and submit the commit on the competition site.
+## Architecture
 
-`artifacts/` already holds a dev-set run of Pi on Claude Opus 5.5 over all 29 dev tasks, so the template can be submitted unchanged. Once you change anything, `name` included, step 3 replaces it with your harness's run.
+```
+                       ┌──────────────────────────────────────────────┐
+                       │               PLE-Titan Harness              │
+                       │           (Claude Opus 5.5 / Argon)          │
+                       └──────────────────────┬───────────────────────┘
+                                              │
+              ┌───────────────────────────────┼───────────────────────────────┐
+              │                               │                               │
+              ▼                               ▼                               ▼
+ ┌─────────────────────────┐     ┌─────────────────────────┐     ┌─────────────────────────┐
+ │     1. MÓDULO PLAN      │     │    2. MÓDULO WORKER     │     │   3. MÓDULO VERIFIER    │
+ │  - Ingestão de CAD/IFC  │ ──► │  - Python-First Math    │ ──► │  - Rubric Self-Grader   │
+ │  - Mapeamento de Normas │     │  - DeepSeek Anti-Loop   │     │  - Deliverables Enforcer│
+ │  - Roteiro de Cálculo   │     │  - Context Pruner       │     │  - Double-Check Numérico│
+ └─────────────────────────┘     └─────────────────────────┘     └─────────────────────────┘
+```
 
-## Files
+## Key Modules
 
 | File | Purpose |
 |---|---|
-| `submission.yaml` | The model, and the install and start commands |
-| `serve.py` | The WebSocket endpoint: hands each task to `harness.solve` |
-| `harness.py` | Runs Pi on each task. Edit `NOTE` (prompt), `THINKING`, or `UNKNOWN_MODEL` (limits for a model Pi doesn't know) |
-| `task-tools.ts` | Points Pi's `read`, `write`, `edit` and `bash` tools at the task container |
-| `taskbridge.py` | The competition protocol |
-| `package.json`, `package-lock.json` | Pi 1.1.0 and every package it uses, pinned. To upgrade, edit `package.json`, run `npm install --package-lock-only`, commit both |
-| `artifacts/` | The dev-set artifacts the portal grades, one folder per dev task |
-| `AGENTS.md` | The full rules, for a coding agent working on your entry |
+| `serve.py` | WebSocket server entrypoint invoking `TitanEngine`. |
+| `titan_engine.py` | Core agent loop orchestrating Planner (10%), Worker (65%), and Verifier (25%) phases. |
+| `titan_guard.py` | DeepSeek-style `RepeatToolGuard` (anti-loop) and `DeliverablesGuard` (file verification). |
+| `titan_compaction.py` | DeepSeek-style tool output pruner and dynamic conversation compactor. |
+| `titan_prompts.py` | Domain-specific physical engineering system directives and role prompts. |
+| `taskbridge.py` | Official competition WebSocket protocol bridge. |
+| `submission.yaml` | Submission declaration with `google-cloud/claude-opus-5-5` and `uv` build instructions. |
+| `requirements.txt` | Minimal pinned Python dependencies (`openai`, `websockets`). |
+| `artifacts/` | Dev-set execution outputs for competition evaluation. |
